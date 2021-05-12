@@ -6,3 +6,8 @@ namePrefix: kustomize-
 resources:
 - nginx-deployment.yaml
 - nginx-svc.yaml
+
+
+commonAnnotations:
+  repo: fr3dx
+  test: test
