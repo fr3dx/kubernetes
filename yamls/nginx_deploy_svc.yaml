@@ -1,42 +1,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
-    app: nginx
-  name: nginx
+    env: prod
+  name: nginx-prod
+  namespace: production
 spec:
-  replicas: 4
+  replicas: 3
   selector:
     matchLabels:
-      app: nginx
-  strategy: {}
+      env: prod
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        app: nginx
+        env: prod
     spec:
+      volumes:
+      - name: shared-volume
+        emptyDir: {}
+      initContainers:
+      - name: busybox
+        image: busybox
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /nginx-data
+        command: ["/bin/sh"]
+        args: ["-c", "echo '<h1>Production</h1>' > /nginx-data/index.html"]
       containers:
       - image: nginx
         name: nginx
-        resources: {}
-status: {}
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /usr/share/nginx/html
 ---
 apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
   labels:
-    app: nginx
-  name: nginx
+    env: prod
+  name: nginx-prod
+  namespace: production
 spec:
+  type: NodePort
   ports:
   - port: 80
     protocol: TCP
     targetPort: 80
   selector:
-    app: nginx
-  type: NodePort
-status:
-  loadBalancer: {}
+    env: prod
