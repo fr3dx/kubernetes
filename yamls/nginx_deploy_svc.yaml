@@ -1,48 +1,49 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  creationTimestamp: null
   labels:
-    app: nginx
-  name: nginx
+    run: nginx
+  name: nginx-deploy
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: nginx
+      run: nginx
   template:
     metadata:
-      creationTimestamp: null
       labels:
-        app: nginx
+        run: nginx
     spec:
+      volumes:
+      - name: shared-volume
+        emptyDir: {}
       initContainers:
-      - image: busybox
-        name: init-container
+      - name: busybox
+        image: busybox
         volumeMounts:
-        - mountPath: /nginx-data
-          name: shared-pod-volume
-          command: ["/bin/sh"]
-          args: ["-c", "echo 'Development' > /nginx-data/index.html"]
+        - name: shared-volume
+          mountPath: /nginx-data
+        command: ["/bin/sh"]
+        args: ["-c", "echo '<h1>Development</h1>' > /nginx-data/index.html"]
       containers:
       - image: nginx
         name: nginx
-      volumes:
-      - name: shared-pod-volume
-        medium: Memory
+        volumeMounts:
+        - name: shared-volume
+          mountPath: /usr/share/nginx/html
 ---
 apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
   labels:
-    app: nginx
-  name: nginx
+    run: nginx
+  name: nginx-deploy
 spec:
+  type: NodePort
   ports:
   - port: 80
     protocol: TCP
     targetPort: 80
   selector:
-    app: nginx
-  type: NodePort
+    run: nginx
