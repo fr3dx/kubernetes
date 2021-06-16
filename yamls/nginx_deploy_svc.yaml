@@ -2,17 +2,18 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    run: nginx
-  name: nginx-deploy
+    env: dev
+  name: nginx-dev
+  namespace: development
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      run: nginx
+      env: dev
   template:
     metadata:
       labels:
-        run: nginx
+        env: dev
     spec:
       volumes:
       - name: shared-volume
@@ -37,8 +38,9 @@ kind: Service
 metadata:
   creationTimestamp: null
   labels:
-    run: nginx
-  name: nginx-deploy
+    env: dev
+  name: nginx-dev
+  namespace: development
 spec:
   type: NodePort
   ports:
@@ -46,4 +48,4 @@ spec:
     protocol: TCP
     targetPort: 80
   selector:
-    run: nginx
+    env: dev
